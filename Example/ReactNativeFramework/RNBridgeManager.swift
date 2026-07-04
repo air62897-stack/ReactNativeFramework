@@ -14,6 +14,9 @@ class RNBridgeManager: NSObject, RNViewProvider {
         guard !initialized else { return }
         initialized = true; initTime = Date()
 
+        // 必须在任何 RN 对象创建前调用，避免 InspectorFlags 报错
+        RNJSRuntimeConfigurator.earlyInitialize()
+
         let url = "\(metroServerURL)/src/registry.bundle?platform=ios&dev=true&minify=false&modulesOnly=false&runModule=true"
         guard let bundleURL = URL(string: url) else { return }
         print("[RNEmbed] Init: \(url)")
