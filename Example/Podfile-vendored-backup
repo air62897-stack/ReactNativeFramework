@@ -1,0 +1,20 @@
+# Podfile-vendored
+# 用于测试 ReactNativeFramework-vendored（完全隔离模式，无需 use_react_native!）
+#
+# 使用方式:
+#   1. 先运行 ../build_vendor.sh 生成 Vendor/ 目录
+#   2. 复制本文件为 Podfile: cp Podfile-vendored Podfile
+#   3. pod install
+#
+# 宿主 App 只需这一行即可集成 React Native，无需任何 React 依赖！
+
+platform :ios, '16.0'
+use_frameworks!
+
+target 'ReactNativeFramework_Example' do
+  pod 'ReactNativeFramework-vendored', :path => '../'
+
+  target 'ReactNativeFramework_Tests' do
+    inherit! :search_paths
+  end
+end

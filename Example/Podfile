@@ -1,0 +1,41 @@
+require_relative '../../my-new-rnapp/node_modules/react-native/scripts/react_native_pods'
+
+platform :ios, '16.0'
+use_frameworks!
+
+# 仅注册 use_react_native! 缺失的关键 podspecs
+pod 'fast_float', :podspec => '../../my-new-rnapp/node_modules/react-native/third-party-podspecs/fast_float.podspec'
+
+target 'ReactNativeFramework_Example' do
+  use_react_native!(
+    :app_path => "../../my-new-rnapp",
+    :path => "../../my-new-rnapp/node_modules/react-native",
+    :production => false,
+    :hermes_enabled => true,
+    :fabric_enabled => true,
+  )
+
+  pod 'ReactNativeFramework', :path => '../'
+
+  target 'ReactNativeFramework_Tests' do
+    inherit! :search_paths
+  end
+end
+
+post_install do |installer|
+  react_native_post_install(
+    installer,
+    "../../my-new-rnapp/node_modules/react-native",
+    :mac_catalyst_enabled => false,
+  )
+
+  installer.pods_project.targets.each do |target|
+    target.build_phases.each do |phase|
+      if phase.respond_to?(:shell_script) && phase.shell_script
+        phase.shell_script = phase.shell_script.gsub('../../node_modules/', '../../my-new-rnapp/node_modules/')
+        phase.shell_script = phase.shell_script.gsub('${PODS_ROOT}/../../node_modules', '../../my-new-rnapp/node_modules')
+        phase.shell_script = phase.shell_script.gsub('$PODS_ROOT/../../node_modules', '../../my-new-rnapp/node_modules')
+      end
+    end
+  end
+end

@@ -1,0 +1,39 @@
+require_relative '../../my-new-rnapp/node_modules/react-native/scripts/react_native_pods'
+
+platform :ios, '16.0'
+use_frameworks!
+
+target 'ReactNativeFramework_Example' do
+  pod 'ReactNativeFramework', :path => '../'
+
+  # 集成 React Native 核心 Pods（指向同级的 my-new-rnapp 项目）
+  use_react_native!(
+    :app_path => "../../my-new-rnapp",
+    :path => "../../my-new-rnapp/node_modules/react-native",
+    :production => false,
+    :hermes_enabled => true,
+    :fabric_enabled => true,
+  )
+
+  target 'ReactNativeFramework_Tests' do
+    inherit! :search_paths
+  end
+end
+
+post_install do |installer|
+  react_native_post_install(
+    installer,
+    "../../my-new-rnapp/node_modules/react-native",
+    :mac_catalyst_enabled => false,
+  )
+
+  installer.pods_project.targets.each do |target|
+    target.build_phases.each do |phase|
+      if phase.respond_to?(:shell_script) && phase.shell_script
+        phase.shell_script = phase.shell_script.gsub('../../node_modules/', '../../my-new-rnapp/node_modules/')
+        phase.shell_script = phase.shell_script.gsub('${PODS_ROOT}/../../node_modules', '../../my-new-rnapp/node_modules')
+        phase.shell_script = phase.shell_script.gsub('$PODS_ROOT/../../node_modules', '../../my-new-rnapp/node_modules')
+      end
+    end
+  end
+end
